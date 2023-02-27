@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "832531444571",
+    "project_id": "marvel-41bea",
+    "storage_bucket": "marvel-41bea.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:832531444571:android:cfbb3929694f8f19d9a07e",
+        "android_client_info": {
+          "package_name": "com.patric.skeleton"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "832531444571-re8hjqcir8phis3iccjto9isid1ruinp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIvjcxWaC6fJBetCcwuwfPnIfhF-zyT5g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "832531444571-re8hjqcir8phis3iccjto9isid1ruinp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

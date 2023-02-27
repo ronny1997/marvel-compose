@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Skeleton App</string>
+    <string name="account_label">Cuenta</string>
+    <string name="user_label">Usuario</string>
+    <string name="password_label">Contraseña</string>
+    <string name="device_label">Dispositivo</string>
+    <string name="sign_in_label">Iniciar Sesión</string>
+    <string name="url_label">URL</string>
+    <string name="save_label">Guardar</string>
+    <string name="cancel_label">Cancelar</string>
+    <string name="base_url_dialog_title">Base URL</string>
+    <string name="empty_field_error">por favor, indique</string>
+</resources>
