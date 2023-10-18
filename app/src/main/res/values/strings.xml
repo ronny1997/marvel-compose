@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">MARVEL</string>
+    <string name="dialog_error_title">Se ha producido un error.</string>
+    <string name="unknown_Error">Something went wrong on our end</string>
+    <string name="internet_Error">NO INTERNET\nPlease check your network connection.</string>
+    <string name="character_marvel">character marvel</string>
+    <string name="description">Description</string>
+    <string name="comics">Comics</string>
+
+    <!--CharacterDetailFragment-->
+    <string name="character_transition_name">character_card_%1$s</string>
+    <string name="character_detail_transition_name">character_card_detail</string>
+    <string name="stories">Stories</string>
+    <string name="toolbar_title">Toolbar title</string>
+    <string name="oops">OOPS!</string>
+    <string name="retry">Reintentar</string>
+    <string name="empty_description_character">There is no information about this character</string>
+    <string name="close_character">Close character</string>
+
+</resources>
