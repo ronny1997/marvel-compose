@@ -1,0 +1,27 @@
+[versions]
+core-ktx = "1.10.1"
+material-compose = "1.3.1"
+material = "1.10.0"
+activity-compose = "1.5.1"
+lifecycle = "2.5.1"
+navigation-compose = "2.6.0"
+appcompat = "1.6.1"
+org-jetbrains-kotlin-android = "1.8.10"
+coroutines = "1.6.4"
+kotlin = "1.8.10"
+
+[libraries]
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+material-compose = { group = "androidx.compose.material", name = "material", version.ref = "material-compose" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
+lifecycle = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+
+
+[bundles]
+androidx = ["core-ktx", "lifecycle", "appcompat", "material"]
+compose = ["material-compose", "activity-compose", "navigation-compose"]
