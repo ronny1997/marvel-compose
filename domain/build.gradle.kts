@@ -23,4 +23,5 @@ android {
 dependencies {
     implementation(libs.coroutines)
     implementation(libs.kotlin.reflect)
+    testImplementation(libs.bundles.test)
 }

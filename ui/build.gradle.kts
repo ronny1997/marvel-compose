@@ -29,4 +29,5 @@ dependencies {
     implementation(project(":domain"))
     api(libs.bundles.androidx)
     api(libs.bundles.compose)
+    testImplementation(libs.bundles.test)
 }

@@ -44,4 +44,5 @@ android {
 
 dependencies {
     implementation(project(":ui"))
+    androidTestImplementation(libs.bundles.test)
 }

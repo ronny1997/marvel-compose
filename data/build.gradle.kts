@@ -23,4 +23,5 @@ dependencies {
     implementation(project(":domain"))
     implementation(libs.coroutines)
     implementation(libs.kotlin.reflect)
+    testImplementation(libs.bundles.test)
 }
