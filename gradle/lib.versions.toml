@@ -20,6 +20,8 @@ junit-assertions = "1.0.0"
 truth = "1.0.0"
 testng-version = "6.9.6"
 junit-ktx-version = "1.1.5"
+hilt-navigation-version = "1.0.0"
+hilt-android-version = "2.44"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -31,6 +33,12 @@ navigation-compose = { group = "androidx.navigation", name = "navigation-compose
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+#Dagger
+hilt-navigation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-version" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt-android-version" }
+hilt-kapt = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt-android-version" }
+
+
 #Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 turbine = { module = "app.cash.turbine:turbine", name = "turbine", version.ref = "turbine" }
