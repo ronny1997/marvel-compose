@@ -22,6 +22,8 @@ testng-version = "6.9.6"
 junit-ktx-version = "1.1.5"
 hilt-navigation-version = "1.0.0"
 hilt-android-version = "2.44"
+ktor-core-version = "2.3.5"
+guava-version = "27.0.1-android"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -33,11 +35,16 @@ navigation-compose = { group = "androidx.navigation", name = "navigation-compose
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+guava = { module = "com.google.guava:guava", version.ref = "guava-version" }
 #Dagger
 hilt-navigation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-version" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt-android-version" }
 hilt-kapt = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt-android-version" }
-
+#Ktor
+ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-core-version" }
+ktor-client = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor-core-version" }
+ktor-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor-core-version" }
+ktor-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor-core-version" }
 
 #Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -54,3 +61,4 @@ testng = { group = "org.testng", name = "testng", version.ref = "testng-version"
 androidx = ["core-ktx", "lifecycle", "appcompat", "material"]
 compose = ["material-compose", "activity-compose", "navigation-compose"]
 test = ["junit", "android-core-test", "junit-ktx", "junit-assertions-test", "android-truth", "testng"]
+ktor = ["ktor-client", "ktor-core", "ktor-android", "ktor-logging"]
