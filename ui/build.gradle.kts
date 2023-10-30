@@ -31,6 +31,7 @@ dependencies {
     implementation(project(":domain"))
     api(libs.bundles.androidx)
     api(libs.bundles.compose)
+    implementation(libs.coroutines.playservices)
     implementation(libs.hilt.navigation)
     implementation(libs.hilt.android)
     implementation(libs.guava)
