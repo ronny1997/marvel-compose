@@ -49,6 +49,9 @@ android {
 
 dependencies {
     implementation(project(":ui"))
+    implementation(project(":framework"))
+    implementation(project(":data"))
+    implementation(project(":domain"))
     implementation(libs.hilt.navigation)
     implementation(libs.hilt.android)
     kapt(libs.hilt.kapt)

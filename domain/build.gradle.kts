@@ -1,6 +1,8 @@
 plugins {
-    id ("com.android.library")
-    id ("org.jetbrains.kotlin.android")
+    id("com.android.library")
+    id("org.jetbrains.kotlin.android")
+    kotlin("kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -23,5 +25,8 @@ android {
 dependencies {
     implementation(libs.coroutines)
     implementation(libs.kotlin.reflect)
+    implementation(libs.bundles.ktor)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.kapt)
     testImplementation(libs.bundles.test)
 }
