@@ -1,7 +1,9 @@
-package com.mpapps.marvelcompose.domain.usecase
+package com.mpapps.marvelcompose.domain.infrastructure.base
 
 import com.mpapps.marvelcompose.domain.DomainResult
-import com.mpapps.marvelcompose.domain.model.error.DomainError
+import com.mpapps.marvelcompose.domain.infrastructure.error.NotFoundRepositoryException
+import com.mpapps.marvelcompose.domain.infrastructure.error.UnauthorizedRepositoryException
+import com.mpapps.marvelcompose.domain.infrastructure.error.DomainError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -22,7 +24,10 @@ abstract class BaseUseCase<out T : Any, in Params> {
     }
 
     protected open fun handleError(e: RuntimeException): DomainError {
-        return DomainError.NoConnectionError
+        return when (e) {
+            is UnauthorizedRepositoryException -> DomainError.NoConnectionError
+            is NotFoundRepositoryException -> DomainError.NotFoundError
+            else -> DomainError.NotFoundError
+        }
     }
-
 }

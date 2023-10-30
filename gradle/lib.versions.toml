@@ -46,6 +46,8 @@ ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-core-vers
 ktor-client = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor-core-version" }
 ktor-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor-core-version" }
 ktor-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor-core-version" }
+ktor-serialization = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor-core-version" }
+ktor-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor-core-version" }
 
 #Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -62,4 +64,4 @@ testng = { group = "org.testng", name = "testng", version.ref = "testng-version"
 androidx = ["core-ktx", "lifecycle", "appcompat", "material", "coroutines"]
 compose = ["material-compose", "activity-compose", "navigation-compose"]
 test = ["junit", "android-core-test", "junit-ktx", "junit-assertions-test", "android-truth", "testng"]
-ktor = ["ktor-client", "ktor-core", "ktor-android", "ktor-logging"]
+ktor = ["ktor-client", "ktor-core", "ktor-android", "ktor-logging", "ktor-serialization", "ktor-negotiation"]

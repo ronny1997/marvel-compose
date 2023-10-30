@@ -1,7 +1,7 @@
 package com.mpapps.marvelcompose.ui.utils
 
 import androidx.lifecycle.ViewModel
-import com.mpapps.marvelcompose.domain.model.error.DomainError
+import com.mpapps.marvelcompose.domain.infrastructure.error.DomainError
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
@@ -28,5 +28,7 @@ abstract class BaseViewModel : ViewModel(), CoroutineScope {
     }
 
 
-    protected fun handleError(domainError: DomainError){}
+    protected fun handleError(domainError: DomainError){
+
+    }
 }

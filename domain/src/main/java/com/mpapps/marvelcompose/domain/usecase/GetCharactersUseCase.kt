@@ -1,5 +1,6 @@
 package com.mpapps.marvelcompose.domain.usecase
 
+import com.mpapps.marvelcompose.domain.infrastructure.base.BaseUseCase
 import com.mpapps.marvelcompose.domain.model.Characters
 import com.mpapps.marvelcompose.domain.repository.MarvelRepository
 import javax.inject.Inject

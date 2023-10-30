@@ -4,13 +4,13 @@ import com.mpapps.marvelcompose.data.remote.MarvelDataSource
 import com.mpapps.marvelcompose.framework.BuildConfig
 import com.mpapps.marvelcompose.framework.datasources.cloud.MarvelApi
 import com.mpapps.marvelcompose.framework.datasources.cloud.MarvelDataSourceImpl
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.ANDROID
 import io.ktor.client.plugins.logging.LogLevel
@@ -18,6 +18,8 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
 @Module
@@ -32,6 +34,18 @@ class FrameworkModule {
                     logger = Logger.ANDROID
                     level = LogLevel.BODY
                 }
+            }
+            install(ContentNegotiation) {
+                json(
+                    json = Json {
+                        ignoreUnknownKeys = true
+                        encodeDefaults = true
+                        isLenient = true
+                        allowSpecialFloatingPointValues = true
+                        allowStructuredMapKeys = true
+                        prettyPrint = true
+                    }
+                )
             }
             engine {
                 connectTimeout = 200_000

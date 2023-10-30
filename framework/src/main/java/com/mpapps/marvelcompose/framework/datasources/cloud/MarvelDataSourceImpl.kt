@@ -7,11 +7,14 @@ import javax.inject.Inject
 
 class MarvelDataSourceImpl @Inject constructor(
     private val marvelApi: MarvelApi
-) : MarvelDataSource, CloudDataSourceImpl() {
+) : MarvelDataSource {
 
     override suspend fun getCharacters(): CharactersDto {
-        return execute {
-            marvelApi.getCharacters().toDto()
-        }
+        return marvelApi.getCharacters(
+            ts = "1643971246269",
+            apikey = "40c0f1172b2c2c7fc17e73d2d7a8b016",
+            hash = "d20cada3f36a6b00f16296f6087259c9"
+        ).toDto()
+
     }
 }

@@ -15,7 +15,7 @@ class CharactersViewModel @Inject constructor(
     fun getCharacters() {
         launch {
             charactersUseCase().fold(::handleError) {
-
+                it
             }
         }
     }

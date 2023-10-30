@@ -1,6 +1,6 @@
 package com.mpapps.marvelcompose.domain
 
-import com.mpapps.marvelcompose.domain.model.error.DomainError
+import com.mpapps.marvelcompose.domain.infrastructure.error.DomainError
 
 sealed class DomainResult<out S : Any, out F : Any> {
 
