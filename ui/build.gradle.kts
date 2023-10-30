@@ -1,21 +1,23 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    kotlin("kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
     namespace = "com.mpapps.marvelcompose.ui"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 24
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -26,16 +28,13 @@ android {
 }
 
 dependencies {
-
-    api ("androidx.activity:activity-compose:1.5.1")
-    api ("androidx.compose.material:material:1.3.1")
-    api ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
-    api ("androidx.navigation:navigation-compose:2.6.0")
-    api ("androidx.core:core-ktx:1.6.0")
-    api ("androidx.appcompat:appcompat:1.6.1")
-    androidTestImplementation ("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
-    testImplementation ("androidx.test.ext:junit-ktx:1.1.3")
-    testImplementation ("androidx.test:core-ktx:1.4.0")
-
+    implementation(project(":domain"))
+    api(libs.bundles.androidx)
+    api(libs.bundles.compose)
+    implementation(libs.coroutines.playservices)
+    implementation(libs.hilt.navigation)
+    implementation(libs.hilt.android)
+    implementation(libs.guava)
+    kapt(libs.hilt.kapt)
+    androidTestImplementation(libs.bundles.test)
 }

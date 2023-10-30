@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.mpapps.marvelcompose.domain"
+    namespace = "com.mpapps.marvelcompose.framework"
     compileSdk = 34
 
     defaultConfig {
@@ -23,6 +23,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":data"))
     implementation(libs.coroutines)
     implementation(libs.kotlin.reflect)
     implementation(libs.bundles.ktor)

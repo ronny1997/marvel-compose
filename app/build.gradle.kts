@@ -1,10 +1,12 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    kotlin("kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
-    compileSdk = 33
+    compileSdk = 34
     namespace = "com.mpapps.marvelcompose"
     defaultConfig {
         applicationId = "com.mpapps.marvelcompose"
@@ -21,17 +23,21 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro")
+                "proguard-rules.pro"
+            )
+        }
+        debug {
+            buildConfigField("boolean", "IS_DEBUG", "true")
         }
     }
 
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -42,38 +48,12 @@ android {
 }
 
 dependencies {
-    implementation(project (":ui"))
-
-
-    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
-    implementation("androidx.legacy:legacy-support-v4:1.0.0")
-    implementation("com.google.android.gms:play-services-maps:18.0.2")
-    implementation("com.google.android.material:material:1.5.0")
-
-    //test
-    testImplementation( "org.mockito:mockito-core:3.3.3")
-    testImplementation ("com.google.truth:truth:1.0.1")
-    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0")
-    testImplementation ("junit:junit:4.13.2")
-    testImplementation ("com.squareup.okhttp3:okhttp:5.0.0-alpha.2")
-    testImplementation ("com.squareup.okhttp3:mockwebserver:4.3.1")
-    // AndroidX Test - Instrumented testing
-    androidTestImplementation ("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
-    testImplementation ("androidx.test.ext:junit-ktx:1.1.3")
-    testImplementation ("androidx.test:core-ktx:1.4.0")
-
-    testImplementation ("org.robolectric:robolectric:4.5.1")
-    testImplementation ("androidx.arch.core:core-testing:2.1.0")
-    //Other dependencies
-    testImplementation ("org.hamcrest:hamcrest-all:1.3")
-
-    // Coroutines
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
-
-    //palette
-    implementation ("androidx.palette:palette-ktx:1.0.0")
-
-
+    implementation(project(":ui"))
+    implementation(project(":framework"))
+    implementation(project(":data"))
+    implementation(project(":domain"))
+    implementation(libs.hilt.navigation)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.kapt)
+    androidTestImplementation(libs.bundles.test)
 }

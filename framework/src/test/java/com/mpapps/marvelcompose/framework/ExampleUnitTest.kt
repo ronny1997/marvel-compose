@@ -1,4 +1,4 @@
-package com.mpapps.marvelcompose.ui
+package com.mpapps.marvelcompose.framework
 
 import org.junit.Test
 
