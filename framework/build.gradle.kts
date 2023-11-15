@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    kotlin("plugin.serialization") version "1.4.21"
 }
 
 android {
@@ -10,7 +11,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
     }
 
     compileOptions {
@@ -28,6 +29,9 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.bundles.ktor)
     implementation(libs.hilt.android)
+    implementation(libs.data.store)
+    implementation(libs.gson)
     kapt(libs.hilt.kapt)
     testImplementation(libs.bundles.test)
+    testImplementation(libs.ktor.test)
 }
