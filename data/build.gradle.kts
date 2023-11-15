@@ -12,6 +12,13 @@ android {
     defaultConfig {
         minSdk = 26
     }
+    testOptions {
+        animationsDisabled = true
+        unitTests {
+            isReturnDefaultValues = true
+            isIncludeAndroidResources = true
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

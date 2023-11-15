@@ -1,12 +1,24 @@
 package com.mpapps.marvelcompose.framework.infrastructure.di
 
-import com.mpapps.marvelcompose.data.remote.MarvelDataSource
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
+import com.mpapps.marvelcompose.data.dataSource.MarvelDataSource
+import com.mpapps.marvelcompose.data.dataSource.NumCallApiCacheDataSource
 import com.mpapps.marvelcompose.framework.BuildConfig
-import com.mpapps.marvelcompose.framework.datasources.cloud.MarvelApi
 import com.mpapps.marvelcompose.framework.datasources.cloud.MarvelDataSourceImpl
+import com.mpapps.marvelcompose.framework.datasources.cloud.api.MarvelApi
+import com.mpapps.marvelcompose.framework.datasources.cloud.api.MarvelApiImpl
+import com.mpapps.marvelcompose.framework.datasources.local.cache.service.DataStoreManagerImpl
+import com.mpapps.marvelcompose.framework.datasources.local.cache.service.MemoryCacheService
+import com.mpapps.marvelcompose.framework.datasources.local.cache.NumCallApiCacheDataSourceImpl
+import com.mpapps.marvelcompose.framework.datasources.local.cache.service.DataStoreManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
@@ -25,6 +37,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class FrameworkModule {
+    companion object {
+        const val APP_CACHE = "cache"
+    }
+
     @Provides
     @Singleton
     fun providerHttpClient(): HttpClient {
@@ -59,9 +75,33 @@ class FrameworkModule {
 
     @Provides
     @Singleton
-    fun provideMarvelApi(httpClient: HttpClient): MarvelApi = MarvelApi(httpClient)
+    fun provideDataStoreManager(dataStore: DataStore<Preferences>): DataStoreManager =
+        DataStoreManagerImpl(dataStore)
 
     @Provides
     @Singleton
-    fun provideMarvelDataSource(api: MarvelApi): MarvelDataSource = MarvelDataSourceImpl(api)
+    fun provideMemoryCacheService(dataStore: DataStoreManager): MemoryCacheService =
+        MemoryCacheService(dataStore)
+
+    @Provides
+    @Singleton
+    fun provideNumCallApiCacheDataSource(dataStoreManager: DataStoreManagerImpl): NumCallApiCacheDataSource {
+        return NumCallApiCacheDataSourceImpl(dataStoreManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCacheManager(@ApplicationContext appContext: Context): DataStore<Preferences> {
+        return PreferenceDataStoreFactory.create {
+            appContext.preferencesDataStoreFile(APP_CACHE)
+        }
+    }
+
+    @Provides
+    @Singleton
+    fun provideMarvelApi(httpClient: HttpClient): MarvelApi = MarvelApiImpl(httpClient)
+
+    @Provides
+    @Singleton
+    fun provideMarvelDataSource(api: MarvelApiImpl): MarvelDataSource = MarvelDataSourceImpl(api)
 }

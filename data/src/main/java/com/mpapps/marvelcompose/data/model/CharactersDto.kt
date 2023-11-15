@@ -1,6 +1,6 @@
-package com.mpapps.marvelcompose.domain.model
+package com.mpapps.marvelcompose.data.model
 
-data class Characters (
+data class CharactersDto (
     val id: String,
     val name: String,
     val description: String,

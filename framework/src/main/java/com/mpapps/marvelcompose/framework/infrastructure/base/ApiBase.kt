@@ -1,21 +1,22 @@
 package com.mpapps.marvelcompose.framework.infrastructure.base
 
-import com.mpapps.marvelcompose.data.infrastructure.error.NotFoundException
-import com.mpapps.marvelcompose.data.infrastructure.error.UnauthorizedException
+import com.mpapps.marvelcompose.data.infrastructure.error.DataException
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
-abstract class ApiBase() {
 
-    suspend inline fun <reified T> runRequest(httpResponse: HttpResponse): T {
-        return try {
-            httpResponse.call.body()
-        } catch (ex: Exception) {
-            when (httpResponse.status) {
-                HttpStatusCode.Unauthorized -> throw UnauthorizedException(ex.message ?: "")
-                else -> throw NotFoundException(ex.message ?: "")
-            }
+abstract class ApiBase {
+
+    protected inline fun <reified T> runRequest(
+        httpResponse: HttpResponse
+    ): Flow<T> = flow {
+        when (httpResponse.status) {
+            HttpStatusCode.OK -> emit(httpResponse.call.body())
+            HttpStatusCode.Unauthorized -> throw DataException.UnauthorizedException(httpResponse.status.description)
+            else -> throw DataException.NotFoundException(httpResponse.status.description)
         }
     }
 

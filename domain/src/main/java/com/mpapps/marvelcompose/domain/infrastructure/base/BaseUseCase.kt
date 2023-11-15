@@ -1,32 +1,34 @@
 package com.mpapps.marvelcompose.domain.infrastructure.base
 
 import com.mpapps.marvelcompose.domain.DomainResult
-import com.mpapps.marvelcompose.domain.infrastructure.error.NotFoundRepositoryException
-import com.mpapps.marvelcompose.domain.infrastructure.error.UnauthorizedRepositoryException
 import com.mpapps.marvelcompose.domain.infrastructure.error.DomainError
+import com.mpapps.marvelcompose.domain.infrastructure.error.RepositoryException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 
 @Suppress("UNCHECKED_CAST")
 abstract class BaseUseCase<out T : Any, in Params> {
 
-    protected abstract suspend fun runInBackground(params: Params): T
+    protected abstract suspend fun runInBackground(params: Params): Flow<T>
 
-    suspend operator fun invoke(params: Params? = null): DomainResult<T, DomainError> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val result = runInBackground(params ?: Unit as Params)
-                DomainResult.Success(result)
-            } catch (e: RuntimeException) {
-                DomainResult.Error(handleError(e))
-            }
-        }
+     suspend operator fun invoke(params: Params? = null): Flow<DomainResult<T, DomainError>> {
+         return runInBackground(params ?: Unit as Params)
+             .map { result ->
+                 DomainResult.Success(result)
+             }
+             .catch { e ->
+                DomainResult.Error(handleError(e as RuntimeException))
+             }
+             .flowOn(Dispatchers.IO)
     }
 
     protected open fun handleError(e: RuntimeException): DomainError {
         return when (e) {
-            is UnauthorizedRepositoryException -> DomainError.NoConnectionError
-            is NotFoundRepositoryException -> DomainError.NotFoundError
+            is RepositoryException.UnauthorizedRepositoryException -> DomainError.NoConnectionError
+            is RepositoryException.NotFoundRepositoryException -> DomainError.NotFoundError
             else -> DomainError.NotFoundError
         }
     }
