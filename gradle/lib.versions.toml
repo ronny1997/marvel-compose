@@ -28,6 +28,9 @@ guava-version = "27.0.1-android"
 mockitokotlin = "2.2.0"
 data-store-version = "1.0.0"
 gson-version = "2.10.1"
+coil-version = "2.5.0"
+compose-preview-version = "1.1.1"
+palette-version = "1.0.0"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -43,7 +46,10 @@ coroutines-playservices = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-p
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 guava = { module = "com.google.guava:guava", version.ref = "guava-version" }
 data-store = { module = "androidx.datastore:datastore-preferences", version.ref = "data-store-version" }
-gson = {module = "com.google.code.gson:gson", version.ref = "gson-version"}
+gson = { module = "com.google.code.gson:gson", version.ref = "gson-version" }
+coil = { module = "io.coil-kt:coil-compose", version.ref = "coil-version" }
+compose-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose-preview-version" }
+palette = { module = "androidx.palette:palette", version.ref = "palette-version" }
 #Dagger
 hilt-navigation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-version" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt-android-version" }
@@ -72,6 +78,6 @@ ktor-test = { group = "io.ktor", name = "ktor-client-mock", version.ref = "ktor-
 
 [bundles]
 androidx = ["core-ktx", "appcompat", "material", "coroutines"]
-compose = ["material-compose", "activity-compose", "navigation-compose", "lifecycle-comose", "lifecycle"]
+compose = ["material-compose", "activity-compose", "navigation-compose", "lifecycle-comose", "lifecycle", "coil", "compose-preview", "palette"]
 test = ["junit", "android-core-test", "junit-ktx", "junit-assertions-test", "android-truth", "testng", "mockito-core-test", "coroutines-test", "mockito-inline", "mockitokotlin"]
 ktor = ["ktor-client", "ktor-core", "ktor-android", "ktor-logging", "ktor-serialization", "ktor-negotiation"]

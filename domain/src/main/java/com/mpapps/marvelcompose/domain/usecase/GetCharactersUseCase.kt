@@ -4,7 +4,6 @@ import com.mpapps.marvelcompose.domain.infrastructure.base.BaseUseCase
 import com.mpapps.marvelcompose.domain.model.Characters
 import com.mpapps.marvelcompose.domain.repository.MarvelRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class GetCharactersUseCase @Inject constructor(

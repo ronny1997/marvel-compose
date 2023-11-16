@@ -5,11 +5,15 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.Typography
+import androidx.compose.ui.text.font.Font
+import com.mpapps.marvelcompose.ui.R
 
 // Set of Material typography styles to start with
 val Typography = Typography(
     body1 = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = FontFamily(
+            Font(R.font.marvel_regular, FontWeight.Normal)
+        ),
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
