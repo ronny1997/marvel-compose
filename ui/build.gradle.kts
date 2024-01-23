@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.hilt.navigation)
     implementation(libs.hilt.android)
     implementation(libs.guava)
+    implementation(libs.gson)
     kapt(libs.hilt.kapt)
     androidTestImplementation(libs.bundles.test)
 }

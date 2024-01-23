@@ -9,6 +9,5 @@ data class CharactersUi(
     val name: String,
     val description: String,
     val thumbnail: String,
-    val painter: Painter? = null,
-    val color: Color? = null,
+    val color: ULong? = null,
 ) : Serializable

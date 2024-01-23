@@ -6,4 +6,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CharactersDetailViewModel @Inject constructor() : ViewModel() {
+
+
+
+
+
 }

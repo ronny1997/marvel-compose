@@ -48,6 +48,7 @@ import androidx.palette.graphics.Palette
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.google.gson.Gson
 import com.mpapps.marvelcompose.ui.views.players.model.CharactersUi
 import com.mpapps.marvelcompose.ui.views.players.state.CharacterEvent
 import com.mpapps.marvelcompose.ui.views.players.viewmodel.CharactersViewModel
@@ -55,7 +56,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 
 @Composable
-fun PlayersScreen(navigate: (String) -> Unit) {
+fun PlayersScreen(navigateTo: (CharactersUi) -> Unit) {
     val vm: CharactersViewModel = hiltViewModel()
     val uiState = vm.uiState
     Column {
@@ -72,7 +73,7 @@ fun PlayersScreen(navigate: (String) -> Unit) {
                 }
             },
             onClickCharacter = {
-                navigate(it)
+                navigateTo(it)
             },
             onLoadMore = {
                 vm.onEvent(CharacterEvent.GetCharacters)
@@ -85,7 +86,7 @@ fun PlayersScreen(navigate: (String) -> Unit) {
 fun GridComposeCharacters(
     list: List<CharactersUi>,
     loadDataCharacter: @Composable (CharactersUi) -> Unit,
-    onClickCharacter: (String) -> Unit,
+    onClickCharacter: (CharactersUi) -> Unit,
     onLoadMore: () -> Unit,
 ) {
     val lazyGridState = rememberLazyGridState()
@@ -98,9 +99,8 @@ fun GridComposeCharacters(
             CharacterItem(
                 id = character.id,
                 name = character.name,
-                painterCharacter = character.painter,
                 thumbnail = character.thumbnail,
-                onClickCharacter = { onClickCharacter(it) },
+                onClickCharacter = { onClickCharacter(character) },
                 colorCharacter = character.color,
             ) {
                 loadDataCharacter(character)
@@ -127,21 +127,20 @@ fun GridComposeCharacters(
 fun CharacterItem(
     id: String,
     name: String,
-    painterCharacter: Painter?,
     thumbnail: String,
     onClickCharacter: (String) -> Unit,
-    colorCharacter: Color?,
+    colorCharacter: ULong?,
     onLoadData: @Composable () -> Unit,
 ) {
     val dominantColor = remember { Animatable(Color.LightGray) }
-    val painter = painterCharacter ?: PainterColor(thumbnail)
-    if (painterCharacter == null) {
+    val painter = PainterColor(thumbnail)
+    if (colorCharacter == null) {
         onLoadData()
     }
 
     LaunchedEffect(colorCharacter) {
         colorCharacter?.let {
-            dominantColor.animateTo(it)
+            dominantColor.animateTo(Color(it))
         }
     }
     val textColor = if (dominantColor.value.luminance() > 0.5f) Color.Black else Color.White
@@ -206,7 +205,7 @@ fun LoadImageAndGetDominantColor(
                 val dominantColor = dominantSwatch?.rgb?.let {
                     Color(dominantSwatch.rgb)
                 } ?: Color.LightGray
-                onBackResult(character.copy(painter = painter, color = dominantColor))
+                onBackResult(character.copy( color = dominantColor.value))
             }
         }
     }
