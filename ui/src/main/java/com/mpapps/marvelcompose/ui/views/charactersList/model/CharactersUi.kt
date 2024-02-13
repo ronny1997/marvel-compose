@@ -1,7 +1,5 @@
-package com.mpapps.marvelcompose.ui.views.players.model
+package com.mpapps.marvelcompose.ui.views.charactersList.model
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import java.io.Serializable
 
 data class CharactersUi(

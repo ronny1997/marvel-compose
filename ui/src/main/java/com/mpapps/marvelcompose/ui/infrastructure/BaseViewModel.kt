@@ -4,67 +4,78 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.mpapps.marvelcompose.domain.infrastructure.error.DomainError
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.SupervisorJob
-import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
-internal abstract class BaseViewModel<VS : ViewState, I : Event> : ViewModel(), CoroutineScope {
+abstract class BaseViewModel<Effect : ViewSideEffect, Event : EventState, UiState : ViewState> : ViewModel() {
 
-
-    private val parentJob = SupervisorJob()
-
-    override val coroutineContext: CoroutineContext
-        get() = Main + coroutineErrorHandler + getJob()
-
-
-    private val coroutineErrorHandler = CoroutineExceptionHandler { _, exception ->
-        handleError(exception)
-
-    }
-
-    protected abstract val specificUiState: VS
-    var uiState by mutableStateOf(
-        UiGenericState(
-            generalState = UiState(isLoading = false),
-            specificState = specificUiState,
-        )
-    )
+    abstract fun setInitialState(): UiState
+    private val initialState: UiState by lazy { setInitialState() }
+    var uiState by mutableStateOf(initialState)
         protected set
 
-    abstract fun onEvent(event: I)
+    private val _event: MutableSharedFlow<Event> = MutableSharedFlow()
+    abstract fun onEvent(event: Event)
 
-    private fun getJob() = if (parentJob.isCancelled || parentJob.isCompleted) {
-        SupervisorJob()
-    } else {
-        parentJob
+    protected fun setState(reducer: UiState.() -> UiState) {
+        val newState = uiState.reducer()
+        uiState = newState
     }
 
-    private fun handleError(t: Throwable?) {
-        handleError(DomainError.GenericError(t?.message))
+    private val _effect: Channel<Effect> = Channel()
+    val effect = _effect.receiveAsFlow()
+
+    init {
+        subscribeToEvents()
     }
 
-    protected fun handleError(domainError: DomainError): UiGenericState<VS> {
-       return when (domainError) {
-            is DomainError.GenericError -> {
-                UiGenericState(
-                    generalState = UiState(isLoading = false, isError = true)
-                )
-            }
-
-            is DomainError.NoConnectionError -> {
-                UiGenericState(
-                    generalState = UiState(isLoading = false, isError = true)
-                )
-            }
-
-            is DomainError.NotFoundError -> {
-                UiGenericState(
-                    generalState = UiState(isLoading = false, isError = true)
-                )
+    private fun subscribeToEvents() {
+        viewModelScope.launch {
+            _event.collect {
+                onEvent(it)
             }
         }
     }
+
+    fun setEvent(event: Event) {
+        viewModelScope.launch { _event.emit(event) }
+    }
+
+    protected fun setEffect(builder: () -> Effect) {
+        val effectValue = builder()
+        viewModelScope.launch { _effect.send(effectValue) }
+    }
+
+    private fun handleError(t: Throwable?) {
+        /* handleError(DomainError.GenericError(t?.message))*/
+    }
+
+    protected fun handleError(domainError: DomainError) {
+
+    }
+    /* protected fun handleError(domainError: DomainError): UiGenericState<VS> {
+         return when (domainError) {
+             is DomainError.GenericError -> {
+                 UiGenericState(
+                     generalState = uiState(isLoading = false, isError = true)
+                 )
+             }
+
+             is DomainError.NoConnectionError -> {
+                 UiGenericState(
+                     generalState = UiState(isLoading = false, isError = true)
+                 )
+             }
+
+             is DomainError.NotFoundError -> {
+                 UiGenericState(
+                     generalState = UiState(isLoading = false, isError = true)
+                 )
+             }
+         }
+     }*/
 }

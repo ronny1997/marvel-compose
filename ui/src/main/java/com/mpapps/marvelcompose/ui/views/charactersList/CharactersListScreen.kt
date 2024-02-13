@@ -1,4 +1,4 @@
-package com.mpapps.marvelcompose.ui.views.players
+package com.mpapps.marvelcompose.ui.views.charactersList
 
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -43,42 +42,57 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.palette.graphics.Palette
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.google.gson.Gson
-import com.mpapps.marvelcompose.ui.views.players.model.CharactersUi
-import com.mpapps.marvelcompose.ui.views.players.state.CharacterEvent
-import com.mpapps.marvelcompose.ui.views.players.viewmodel.CharactersViewModel
+import com.mpapps.marvelcompose.ui.infrastructure.SIDE_EFFECTS_KEY
+import com.mpapps.marvelcompose.ui.views.charactersList.model.CharactersUi
+import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEffect
+import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEvent
+import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListViewState
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onEach
 
 @Composable
-fun PlayersScreen(navigateTo: (CharactersUi) -> Unit) {
-    val vm: CharactersViewModel = hiltViewModel()
-    val uiState = vm.uiState
+fun CharactersListScreen(
+    state: CharactersListViewState,
+    effectFlow: Flow<CharactersListEffect>?,
+    onEventSend: (CharactersListEvent) -> Unit,
+    onNavigationRequested: (CharactersListEffect.Navigation) -> Unit
+) {
+
     Column {
-        if (uiState.generalState.isLoading) {
+        if (state.isLoading) {
             LinearProgressIndicator(
                 modifier = Modifier.fillMaxWidth()
             )
         }
         GridComposeCharacters(
-            list = uiState.specificState?.data ?: listOf(),
+            list = state.data,
             loadDataCharacter = {
                 LoadImageAndGetDominantColor(it) { newCharacterUi ->
-                    vm.updatePainterImage(newCharacterUi)
+                    onEventSend(CharactersListEvent.UpdatePainterImage(newCharacterUi))
                 }
             },
             onClickCharacter = {
-                navigateTo(it)
+                onEventSend(CharactersListEvent.NavigationToDetail(it))
             },
             onLoadMore = {
-                vm.onEvent(CharacterEvent.GetCharacters)
+                onEventSend(CharactersListEvent.GetCharacters)
             }
         )
+    }
+    LaunchedEffect(SIDE_EFFECTS_KEY) {
+        effectFlow?.onEach { effect ->
+            when (effect) {
+                is CharactersListEffect.Navigation.NavigateToDetail -> {
+                    onNavigationRequested(effect)
+                }
+            }
+        }?.collect()
     }
 }
 
@@ -133,7 +147,7 @@ fun CharacterItem(
     onLoadData: @Composable () -> Unit,
 ) {
     val dominantColor = remember { Animatable(Color.LightGray) }
-    val painter = PainterColor(thumbnail)
+    val painter = painterColor(thumbnail)
     if (colorCharacter == null) {
         onLoadData()
     }
@@ -205,7 +219,7 @@ fun LoadImageAndGetDominantColor(
                 val dominantColor = dominantSwatch?.rgb?.let {
                     Color(dominantSwatch.rgb)
                 } ?: Color.LightGray
-                onBackResult(character.copy( color = dominantColor.value))
+                onBackResult(character.copy(color = dominantColor.value))
             }
         }
     }
