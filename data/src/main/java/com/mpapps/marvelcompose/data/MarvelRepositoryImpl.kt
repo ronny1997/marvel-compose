@@ -5,6 +5,7 @@ import com.mpapps.marvelcompose.data.dataSource.NumCallApiCacheDataSource
 import com.mpapps.marvelcompose.data.model.map.toDomain
 import com.mpapps.marvelcompose.data.util.BaseRepository
 import com.mpapps.marvelcompose.domain.model.Characters
+import com.mpapps.marvelcompose.domain.model.Comic
 import com.mpapps.marvelcompose.domain.repository.MarvelRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -34,6 +35,20 @@ class MarvelRepositoryImpl @Inject constructor(
             val data = marvelDataSource.getCharacters(offset, LIMIT_CHARACTERS).map {
                 it.map { charactersDto ->
                     charactersDto.toDomain()
+                }
+            }
+            numCallApiCacheDataSource.setNumCallApi(numCallApi + ONE)
+            data
+        }
+    }
+
+    override suspend fun getComicFromCharacterList(characterId: String): Flow<List<Comic>> {
+        val numCallApi = numCallApiCacheDataSource.getNumCallApi() ?: 0
+        val offset = numCallApi * LIMIT_CHARACTERS
+        return safeExecution {
+            val data = marvelDataSource.getComicsFromCharacter(0, LIMIT_CHARACTERS, characterId).map {
+                it.map { comicDto ->
+                    comicDto.toDomain()
                 }
             }
             numCallApiCacheDataSource.setNumCallApi(numCallApi + ONE)

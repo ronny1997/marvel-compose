@@ -32,9 +32,11 @@ dependencies {
     api(libs.bundles.androidx)
     api(libs.bundles.compose)
     implementation(libs.coroutines.playservices)
+    implementation ("androidx.compose.ui:ui-tooling-preview:1.1.1")
     implementation(libs.hilt.navigation)
     implementation(libs.hilt.android)
     implementation(libs.guava)
+    implementation(libs.gson)
     kapt(libs.hilt.kapt)
     androidTestImplementation(libs.bundles.test)
 }
