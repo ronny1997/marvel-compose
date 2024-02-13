@@ -189,7 +189,7 @@ fun LoadImageAndGetDominantColor(
     character: CharactersUi,
     onBackResult: (CharactersUi) -> Unit
 ) {
-    val painter = PainterColor(character.thumbnail)
+    val painter = painterColor(character.thumbnail)
 
     val imageState = painter.state
     LaunchedEffect(imageState) {
@@ -212,7 +212,7 @@ fun LoadImageAndGetDominantColor(
 }
 
 @Composable
-fun PainterColor(thumbnail: String): AsyncImagePainter {
+fun painterColor(thumbnail: String): AsyncImagePainter {
     return rememberAsyncImagePainter(
         model = ImageRequest.Builder(LocalContext.current)
             .data(thumbnail)
