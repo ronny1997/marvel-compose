@@ -1,8 +1,6 @@
 package com.mpapps.marvelcompose.ui.views.charactersList
 
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import androidx.compose.animation.Animatable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -33,21 +31,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.palette.graphics.Palette
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
+import com.mpapps.marvelcompose.domain.model.Characters
 import com.mpapps.marvelcompose.ui.infrastructure.SIDE_EFFECTS_KEY
-import com.mpapps.marvelcompose.ui.views.charactersList.model.CharactersUi
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEffect
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEvent
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListViewState
@@ -63,27 +57,42 @@ fun CharactersListScreen(
     onEventSend: (CharactersListEvent) -> Unit,
     onNavigationRequested: (CharactersListEffect.Navigation) -> Unit
 ) {
-
     Column {
         if (state.isLoading) {
             LinearProgressIndicator(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        GridComposeCharacters(
-            list = state.data,
-            loadDataCharacter = {
-                LoadImageAndGetDominantColor(it) { newCharacterUi ->
-                    onEventSend(CharactersListEvent.UpdatePainterImage(newCharacterUi))
-                }
-            },
-            onClickCharacter = {
-                onEventSend(CharactersListEvent.NavigationToDetail(it))
-            },
-            onLoadMore = {
-                onEventSend(CharactersListEvent.GetCharacters)
+        val lazyGridState = rememberLazyGridState()
+        LazyVerticalGrid(
+            state = lazyGridState,
+            columns = GridCells.Adaptive(minSize = 128.dp),
+        ) {
+            items(state.data) { character ->
+                CharacterItem(
+                    id = character.id,
+                    name = character.name,
+                    thumbnail = character.bitmapThumbnail,
+                    onClickCharacter = {
+                        onEventSend(CharactersListEvent.NavigationToDetail(character))
+                    },
+                    colorCharacter = Color(character.color ?: 0)
+                )
             }
-        )
+        }
+        LaunchedEffect(lazyGridState) {
+            val snapshotFlowItems = snapshotFlow {
+                lazyGridState.layoutInfo.totalItemsCount
+            }
+            val snapshotFlowIndex = snapshotFlow {
+                lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            }
+            snapshotFlowItems.combine(snapshotFlowIndex) { totalItems, lastIndex ->
+                if (totalItems > 0 && lastIndex >= totalItems - 1) {
+                    onEventSend(CharactersListEvent.GetCharacters)
+                }
+            }.collect()
+        }
     }
     LaunchedEffect(SIDE_EFFECTS_KEY) {
         effectFlow?.onEach { effect ->
@@ -97,64 +106,18 @@ fun CharactersListScreen(
 }
 
 @Composable
-fun GridComposeCharacters(
-    list: List<CharactersUi>,
-    loadDataCharacter: @Composable (CharactersUi) -> Unit,
-    onClickCharacter: (CharactersUi) -> Unit,
-    onLoadMore: () -> Unit,
-) {
-    val lazyGridState = rememberLazyGridState()
-
-    LazyVerticalGrid(
-        state = lazyGridState,
-        columns = GridCells.Adaptive(minSize = 128.dp),
-    ) {
-        items(list) { character ->
-            CharacterItem(
-                id = character.id,
-                name = character.name,
-                thumbnail = character.thumbnail,
-                onClickCharacter = { onClickCharacter(character) },
-                colorCharacter = character.color,
-            ) {
-                loadDataCharacter(character)
-            }
-        }
-    }
-
-    LaunchedEffect(lazyGridState) {
-        val snapshotFlowItems = snapshotFlow {
-            lazyGridState.layoutInfo.totalItemsCount
-        }
-        val snapshotFlowIndex = snapshotFlow {
-            lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-        }
-        snapshotFlowItems.combine(snapshotFlowIndex) { totalItems, lastIndex ->
-            if (totalItems > 0 && lastIndex >= totalItems - 1) {
-                onLoadMore()
-            }
-        }.collect()
-    }
-}
-
-@Composable
 fun CharacterItem(
     id: String,
     name: String,
-    thumbnail: String,
+    thumbnail: Bitmap?,
     onClickCharacter: (String) -> Unit,
-    colorCharacter: ULong?,
-    onLoadData: @Composable () -> Unit,
+    colorCharacter: Color?,
 ) {
     val dominantColor = remember { Animatable(Color.LightGray) }
-    val painter = painterColor(thumbnail)
-    if (colorCharacter == null) {
-        onLoadData()
-    }
 
     LaunchedEffect(colorCharacter) {
         colorCharacter?.let {
-            dominantColor.animateTo(Color(it))
+            dominantColor.animateTo(it)
         }
     }
     val textColor = if (dominantColor.value.luminance() > 0.5f) Color.Black else Color.White
@@ -176,13 +139,15 @@ fun CharacterItem(
                 .size(150.dp)
                 .clip(shape = RoundedCornerShape(8.dp))
         ) {
-            Image(
-                painter = painter,
-                contentDescription = "Characters",
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentScale = ContentScale.Inside,
-            )
+            thumbnail?.let {
+                Image(
+                    bitmap = thumbnail.asImageBitmap(),
+                    contentDescription = "Characters",
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentScale = ContentScale.Inside,
+                )
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -198,51 +163,21 @@ fun CharacterItem(
     }
 }
 
-@Composable
-fun LoadImageAndGetDominantColor(
-    character: CharactersUi,
-    onBackResult: (CharactersUi) -> Unit
-) {
-    val painter = painterColor(character.thumbnail)
-
-    val imageState = painter.state
-    LaunchedEffect(imageState) {
-        if (imageState is AsyncImagePainter.State.Success) {
-            val drawable: Drawable = imageState.result.drawable
-            val bitmap = (drawable as? BitmapDrawable)?.bitmap
-
-            bitmap?.let {
-                val convertedBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-                val palette = Palette.from(convertedBitmap).generate()
-                val dominantSwatch = palette.dominantSwatch
-
-                val dominantColor = dominantSwatch?.rgb?.let {
-                    Color(dominantSwatch.rgb)
-                } ?: Color.LightGray
-                onBackResult(character.copy(color = dominantColor.value))
-            }
-        }
-    }
-}
-
-@Composable
-fun painterColor(thumbnail: String): AsyncImagePainter {
-    return rememberAsyncImagePainter(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(thumbnail)
-            .size(coil.size.Size.ORIGINAL)
-            .build()
-    )
-}
-
 @Preview
 @Composable
-fun Preview() = GridComposeCharacters(
-    list = listOf(
-        CharactersUi(
-            id = "",
-            name = "",
-            description = "",
-            thumbnail = "",
-        )
-    ), loadDataCharacter = {}, onClickCharacter = {}, onLoadMore = {})
+fun Preview() = CharactersListScreen(
+    state = CharactersListViewState(
+        data = listOf(
+            Characters(
+                id = "",
+                name = "",
+                description = "",
+                bitmapThumbnail = null,
+            )
+        ),
+
+        ),
+    effectFlow = null,
+    {},
+    {}
+)

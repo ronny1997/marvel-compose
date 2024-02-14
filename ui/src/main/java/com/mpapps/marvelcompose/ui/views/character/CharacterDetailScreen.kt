@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -77,14 +79,16 @@ fun CharacterDetailScreen(
     )
     {
         Spacer(modifier = Modifier.height(5.dp))
-        Image(
-            painter = PainterColor(thumbnail = state.character?.thumbnail ?: ""),
-            contentDescription = null,
-            contentScale = ContentScale.Inside,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-        )
+        state.character?.bitmapThumbnail?.let {
+            Image(
+                bitmap = it.asImageBitmap(),
+                contentDescription = null,
+                contentScale = ContentScale.Inside,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
+        }
         Spacer(modifier = Modifier.height(15.dp))
         Text(
             text = state.character?.name?.uppercase() ?: "",
@@ -115,7 +119,7 @@ fun CharacterDetailScreen(
                 .padding(5.dp)
                 .fillMaxWidth()
         ) {
-            ComicList(uiState.comicList ?: listOf())
+            ComicList(uiState.comicList)
         }
     }
 }
@@ -134,14 +138,27 @@ fun ComicList(items: List<Comic>) {
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .width(100.dp)
+                    .height(240.dp)
             ) {
-                Image(
-                    painter = PainterColor(thumbnail = items[index].thumbnail),
-                    contentDescription = "Comic photo",
-                    modifier = Modifier
-                        .height(200.dp)
+                val painter = rememberAsyncImagePainter(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(items[index].thumbnail)
+                        .size(Size.ORIGINAL)
+                        .build()
                 )
-                Text(text = items[index].title)
+                Image(
+                    painter = painter,
+                    contentDescription = "Comic photo",
+                    modifier = Modifier.height(200.dp)
+
+                )
+                Text(
+                    text = items[index].title,
+                    maxLines = 2,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                )
             }
         }
     }
@@ -170,14 +187,4 @@ fun Description(description: String) {
         )
     }
 
-}
-
-@Composable
-fun PainterColor(thumbnail: String): AsyncImagePainter {
-    return rememberAsyncImagePainter(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(thumbnail)
-            .size(Size.ORIGINAL)
-            .build()
-    )
 }

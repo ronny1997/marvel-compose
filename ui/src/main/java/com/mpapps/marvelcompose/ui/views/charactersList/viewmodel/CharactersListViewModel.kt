@@ -4,7 +4,6 @@ import androidx.lifecycle.viewModelScope
 import com.mpapps.marvelcompose.domain.model.Characters
 import com.mpapps.marvelcompose.domain.usecase.GetCharactersUseCase
 import com.mpapps.marvelcompose.ui.infrastructure.BaseViewModel
-import com.mpapps.marvelcompose.ui.views.charactersList.model.CharactersUi
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEffect
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEvent
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListViewState
@@ -28,11 +27,10 @@ internal class CharactersListViewModel @Inject constructor(
         when (event) {
             is CharactersListEvent.GetCharacters -> getCharacters()
             is CharactersListEvent.NavigationToDetail -> goToDetail(event.charactersUi)
-            is CharactersListEvent.UpdatePainterImage -> updatePainterImage(event.updateCharactersUi)
         }
     }
 
-    private fun goToDetail(charactersUi: CharactersUi) {
+    private fun goToDetail(charactersUi: Characters) {
         setEffect {
             CharactersListEffect.Navigation.NavigateToDetail(charactersUi)
         }
@@ -53,50 +51,16 @@ internal class CharactersListViewModel @Inject constructor(
                 charactersUseCase()
                     .collectLatest { result ->
                         result.fold(::handleError) { data ->
-                            handleResult(data)
+                            setState {
+                                copy(
+                                    data = uiState.data + data,
+                                    isLoading = false
+                                )
+                            }
                         }
                     }
             }
         }
     }
 
-    private fun handleResult(data: List<Characters>) {
-        val charactersUI = data.map {
-            CharactersUi(
-                id = it.id,
-                name = it.name,
-                description = it.description,
-                thumbnail = it.thumbnail
-            )
-        }
-        val updatedData = uiState.data.let { currentData ->
-            currentData.toMutableList().apply {
-                addAll(charactersUI)
-            }
-        }
-
-        setState {
-            copy(
-                data = updatedData,
-                isLoading = false
-            )
-        }
-    }
-
-    private fun updatePainterImage(updateCharactersUi: CharactersUi) {
-        viewModelScope.launch {
-            val updatedData = uiState.data.map { character ->
-                if (character.id == updateCharactersUi.id) {
-                    updateCharactersUi
-                } else {
-                    character
-                }
-            }
-            setState {
-                copy(
-                    data = updatedData
-                )
-            }
-        }
-    }
 }

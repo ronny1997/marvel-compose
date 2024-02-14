@@ -27,6 +27,7 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.bundles.ktor)
     implementation(libs.hilt.android)
+    implementation(libs.palette)
     kapt(libs.hilt.kapt)
     testImplementation(libs.bundles.test)
 }

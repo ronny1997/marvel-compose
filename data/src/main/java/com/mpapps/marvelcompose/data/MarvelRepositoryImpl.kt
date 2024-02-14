@@ -1,5 +1,7 @@
 package com.mpapps.marvelcompose.data
 
+import android.graphics.Bitmap
+import com.mpapps.marvelcompose.data.dataSource.ImageDataSource
 import com.mpapps.marvelcompose.data.dataSource.MarvelDataSource
 import com.mpapps.marvelcompose.data.dataSource.NumCallApiCacheDataSource
 import com.mpapps.marvelcompose.data.model.map.toDomain
@@ -13,6 +15,7 @@ import javax.inject.Inject
 
 class MarvelRepositoryImpl @Inject constructor(
     private val marvelDataSource: MarvelDataSource,
+    private val imageDataSource: ImageDataSource,
     private val numCallApiCacheDataSource: NumCallApiCacheDataSource,
 ) : MarvelRepository, BaseRepository() {
 
@@ -34,7 +37,8 @@ class MarvelRepositoryImpl @Inject constructor(
         return safeExecution {
             val data = marvelDataSource.getCharacters(offset, LIMIT_CHARACTERS).map {
                 it.map { charactersDto ->
-                    charactersDto.toDomain()
+                    val bitmap = getImageBitmap(charactersDto.thumbnail)
+                    charactersDto.toDomain(bitmap)
                 }
             }
             numCallApiCacheDataSource.setNumCallApi(numCallApi + ONE)
@@ -42,15 +46,21 @@ class MarvelRepositoryImpl @Inject constructor(
         }
     }
 
+    private suspend fun getImageBitmap(url: String): Bitmap? {
+        return imageDataSource.getImageUrl(url)
+    }
+
+
     override suspend fun getComicFromCharacterList(characterId: String): Flow<List<Comic>> {
         val numCallApi = numCallApiCacheDataSource.getNumCallApi() ?: 0
         val offset = numCallApi * LIMIT_CHARACTERS
         return safeExecution {
-            val data = marvelDataSource.getComicsFromCharacter(0, LIMIT_CHARACTERS, characterId).map {
-                it.map { comicDto ->
-                    comicDto.toDomain()
+            val data =
+                marvelDataSource.getComicsFromCharacter(0, LIMIT_CHARACTERS, characterId).map {
+                    it.map { comicDto ->
+                        comicDto.toDomain()
+                    }
                 }
-            }
             numCallApiCacheDataSource.setNumCallApi(numCallApi + ONE)
             data
         }
