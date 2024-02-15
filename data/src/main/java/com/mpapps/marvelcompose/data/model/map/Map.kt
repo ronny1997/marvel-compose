@@ -8,7 +8,8 @@ import com.mpapps.marvelcompose.domain.model.Comic
 fun CharactersDto.toDomain() = Characters(
     id = id, name = name,
     description = description,
-    thumbnail = thumbnail
+    bitmapThumbnail = null,
+    thumbnailUrl = thumbnail
 )
 
 fun ComicDto.toDomain() = Comic(title = title, thumbnail = thumbnail)

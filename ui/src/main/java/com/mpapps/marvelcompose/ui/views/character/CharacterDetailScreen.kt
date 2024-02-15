@@ -1,6 +1,5 @@
-package com.mpapps.marvelcompose.ui.views.questions
+package com.mpapps.marvelcompose.ui.views.character
 
-import android.net.Uri
 import androidx.compose.animation.Animatable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -32,34 +32,38 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
-import com.google.gson.Gson
 import com.mpapps.marvelcompose.domain.model.Comic
 import com.mpapps.marvelcompose.ui.R
-import com.mpapps.marvelcompose.ui.views.players.model.CharactersUi
-import com.mpapps.marvelcompose.ui.views.questions.state.CharacterDetailEvent
-import com.mpapps.marvelcompose.ui.views.questions.viewmodel.CharactersDetailViewModel
+import com.mpapps.marvelcompose.ui.infrastructure.SIDE_EFFECTS_KEY
+import com.mpapps.marvelcompose.ui.views.character.state.CharacterDetailEffect
+import com.mpapps.marvelcompose.ui.views.character.state.CharacterDetailEvent
+import com.mpapps.marvelcompose.ui.views.character.state.CharacterDetailViewState
+import com.mpapps.marvelcompose.ui.views.character.viewmodel.CharacterDetailViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onEach
 
 @Composable
-fun QuestionsScreen(jsonCharacter: String?) {
-    val decodeJson = Uri.decode(jsonCharacter)
-    val characters = Gson().fromJson(decodeJson, CharactersUi::class.java)
-    val dominantColor = remember { Animatable(Color.Transparent) }
-    val viewModel: CharactersDetailViewModel = hiltViewModel()
-    val uiState = viewModel.uiState
+fun CharacterDetailScreen(
+    state: CharacterDetailViewState,
+    effectFlow: Flow<CharacterDetailEffect>?,
+    onEventSend: (CharacterDetailEvent) -> Unit,
+    onNavigationRequested: (CharacterDetailEffect.Navigation) -> Unit
+) {
+    LaunchedEffect(SIDE_EFFECTS_KEY) {
+        effectFlow?.onEach { effect ->
 
-    LaunchedEffect(uiState.specificState) {
-        if (uiState.specificState?.data?.isEmpty() != false) {
-            viewModel.onEvent(CharacterDetailEvent.GetComics(characters.id))
         }
     }
 
-    LaunchedEffect(characters.color) {
-        characters.color?.let {
+    val dominantColor = remember { Animatable(Color.Transparent) }
+    val viewModel: CharacterDetailViewModel = hiltViewModel()
+    val uiState = viewModel.uiState
+
+    LaunchedEffect(state.character?.color) {
+        state.character?.color?.let {
             dominantColor.animateTo(Color(it))
         }
     }
@@ -73,17 +77,19 @@ fun QuestionsScreen(jsonCharacter: String?) {
     )
     {
         Spacer(modifier = Modifier.height(5.dp))
-        Image(
-            painter = PainterColor(thumbnail = characters.thumbnail),
-            contentDescription = null,
-            contentScale = ContentScale.Inside,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-        )
+        state.character?.bitmapThumbnail?.let {
+            Image(
+                bitmap = it.asImageBitmap(),
+                contentDescription = null,
+                contentScale = ContentScale.Inside,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
+        }
         Spacer(modifier = Modifier.height(15.dp))
         Text(
-            text = characters.name.uppercase(),
+            text = state.character?.name?.uppercase() ?: "",
             textAlign = TextAlign.Center,
             style = TextStyle(
                 fontWeight = FontWeight.Bold,
@@ -100,7 +106,7 @@ fun QuestionsScreen(jsonCharacter: String?) {
                 .padding(5.dp)
                 .fillMaxWidth()
         ) {
-            Description(characters.description)
+            Description(state.character?.description ?: "")
         }
         Spacer(modifier = Modifier.height(15.dp))
         Column(
@@ -111,7 +117,7 @@ fun QuestionsScreen(jsonCharacter: String?) {
                 .padding(5.dp)
                 .fillMaxWidth()
         ) {
-            ComicList(uiState.specificState?.data ?: listOf())
+            ComicList(uiState.comicList)
         }
     }
 }
@@ -130,14 +136,28 @@ fun ComicList(items: List<Comic>) {
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .width(100.dp)
+                    .height(240.dp)
             ) {
-                Image(
-                    painter = PainterColor(thumbnail = items[index].thumbnail),
-                    contentDescription = "Comic photo",
-                    modifier = Modifier
-                        .height(200.dp)
+                val painter = rememberAsyncImagePainter(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(items[index].thumbnail)
+                        .size(Size.ORIGINAL)
+                        .build()
                 )
-                Text(text = items[index].title)
+
+                Image(
+                    painter = painter,
+                    contentDescription = "Comic photo",
+                    modifier = Modifier.height(200.dp)
+
+                )
+                Text(
+                    text = items[index].title,
+                    maxLines = 2,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                )
             }
         }
     }
@@ -166,14 +186,4 @@ fun Description(description: String) {
         )
     }
 
-}
-
-@Composable
-fun PainterColor(thumbnail: String): AsyncImagePainter {
-    return rememberAsyncImagePainter(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(thumbnail)
-            .size(Size.ORIGINAL)
-            .build()
-    )
 }

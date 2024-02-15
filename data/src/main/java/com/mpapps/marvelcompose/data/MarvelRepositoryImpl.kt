@@ -17,7 +17,7 @@ class MarvelRepositoryImpl @Inject constructor(
 ) : MarvelRepository, BaseRepository() {
 
     companion object {
-        const val LIMIT_CHARACTERS = 15
+        const val LIMIT_CHARACTERS = 30
         const val ONE = 1
     }
 
@@ -42,15 +42,18 @@ class MarvelRepositoryImpl @Inject constructor(
         }
     }
 
+
+
     override suspend fun getComicFromCharacterList(characterId: String): Flow<List<Comic>> {
         val numCallApi = numCallApiCacheDataSource.getNumCallApi() ?: 0
         val offset = numCallApi * LIMIT_CHARACTERS
         return safeExecution {
-            val data = marvelDataSource.getComicsFromCharacter(0, LIMIT_CHARACTERS, characterId).map {
-                it.map { comicDto ->
-                    comicDto.toDomain()
+            val data =
+                marvelDataSource.getComicsFromCharacter(0, LIMIT_CHARACTERS, characterId).map {
+                    it.map { comicDto ->
+                        comicDto.toDomain()
+                    }
                 }
-            }
             numCallApiCacheDataSource.setNumCallApi(numCallApi + ONE)
             data
         }
