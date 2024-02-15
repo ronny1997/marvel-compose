@@ -1,6 +1,7 @@
 package com.mpapps.marvelcompose.ui.views.charactersList
 
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import androidx.compose.animation.Animatable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,13 +35,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mpapps.marvelcompose.domain.model.Characters
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import coil.size.Size
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.mpapps.marvelcompose.ui.infrastructure.SIDE_EFFECTS_KEY
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEffect
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEvent
@@ -72,11 +78,16 @@ fun CharactersListScreen(
                 CharacterItem(
                     id = character.id,
                     name = character.name,
-                    thumbnail = character.bitmapThumbnail,
+                    thumbnailUrl = character.bitmapThumbnail,
+                    colorCharacter = Color(character.color ?: 0),
                     onClickCharacter = {
                         onEventSend(CharactersListEvent.NavigationToDetail(character))
                     },
-                    colorCharacter = Color(character.color ?: 0)
+                    onLoadImage = {
+                        onEventSend(
+                            CharactersListEvent.LoadImage(character.id, character.thumbnailUrl)
+                        )
+                    }
                 )
             }
         }
@@ -109,9 +120,10 @@ fun CharactersListScreen(
 fun CharacterItem(
     id: String,
     name: String,
-    thumbnail: Bitmap?,
-    onClickCharacter: (String) -> Unit,
+    thumbnailUrl: Bitmap?,
     colorCharacter: Color?,
+    onClickCharacter: (String) -> Unit,
+    onLoadImage: () -> Unit
 ) {
     val dominantColor = remember { Animatable(Color.LightGray) }
 
@@ -139,15 +151,15 @@ fun CharacterItem(
                 .size(150.dp)
                 .clip(shape = RoundedCornerShape(8.dp))
         ) {
-            thumbnail?.let {
+            thumbnailUrl?.let {
                 Image(
-                    bitmap = thumbnail.asImageBitmap(),
+                    bitmap = thumbnailUrl.asImageBitmap(),
                     contentDescription = "Characters",
                     modifier = Modifier
                         .fillMaxSize(),
                     contentScale = ContentScale.Inside,
                 )
-            }
+            } ?: run(onLoadImage)
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -167,16 +179,8 @@ fun CharacterItem(
 @Composable
 fun Preview() = CharactersListScreen(
     state = CharactersListViewState(
-        data = listOf(
-            Characters(
-                id = "",
-                name = "",
-                description = "",
-                bitmapThumbnail = null,
-            )
-        ),
-
-        ),
+        data = listOf(),
+    ),
     effectFlow = null,
     {},
     {}

@@ -38,5 +38,6 @@ dependencies {
     implementation(libs.guava)
     implementation(libs.gson)
     kapt(libs.hilt.kapt)
+    implementation("com.google.accompanist:accompanist-drawablepainter:0.28.0")
     androidTestImplementation(libs.bundles.test)
 }

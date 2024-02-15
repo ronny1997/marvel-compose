@@ -37,6 +37,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.mpapps.marvelcompose.domain.model.Comic
 import com.mpapps.marvelcompose.ui.R
 import com.mpapps.marvelcompose.ui.infrastructure.SIDE_EFFECTS_KEY
@@ -146,6 +147,7 @@ fun ComicList(items: List<Comic>) {
                         .size(Size.ORIGINAL)
                         .build()
                 )
+
                 Image(
                     painter = painter,
                     contentDescription = "Comic photo",
