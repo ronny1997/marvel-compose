@@ -1,7 +1,6 @@
 package com.mpapps.marvelcompose.ui.views.charactersList
 
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import androidx.compose.animation.Animatable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -35,18 +34,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import coil.size.Size
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import com.mpapps.marvelcompose.domain.model.Characters
 import com.mpapps.marvelcompose.ui.infrastructure.SIDE_EFFECTS_KEY
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEffect
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEvent
@@ -179,7 +173,29 @@ fun CharacterItem(
 @Composable
 fun Preview() = CharactersListScreen(
     state = CharactersListViewState(
-        data = listOf(),
+        data = listOf(
+            Characters(
+                "id",
+                "name",
+                description = "",
+                bitmapThumbnail = null,
+                thumbnailUrl = ""
+            ),
+            Characters(
+                "id",
+                "name",
+                description = "",
+                bitmapThumbnail = null,
+                thumbnailUrl = ""
+            ),
+            Characters(
+                "id",
+                "name",
+                description = "",
+                bitmapThumbnail = null,
+                thumbnailUrl = ""
+            )
+        ),
     ),
     effectFlow = null,
     {},

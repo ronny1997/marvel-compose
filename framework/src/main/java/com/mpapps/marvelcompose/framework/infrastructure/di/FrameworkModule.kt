@@ -15,6 +15,7 @@ import com.mpapps.marvelcompose.framework.datasources.local.cache.NumCallApiCach
 import com.mpapps.marvelcompose.framework.datasources.local.cache.service.DataStoreManager
 import com.mpapps.marvelcompose.framework.datasources.local.cache.service.DataStoreManagerImpl
 import com.mpapps.marvelcompose.framework.datasources.local.cache.service.MemoryCacheService
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -75,19 +76,8 @@ class FrameworkModule {
 
     @Provides
     @Singleton
-    fun provideDataStoreManager(dataStore: DataStore<Preferences>): DataStoreManager =
-        DataStoreManagerImpl(dataStore)
-
-    @Provides
-    @Singleton
     fun provideMemoryCacheService(dataStore: DataStoreManager): MemoryCacheService =
         MemoryCacheService(dataStore)
-
-    @Provides
-    @Singleton
-    fun provideNumCallApiCacheDataSource(dataStoreManager: DataStoreManagerImpl): NumCallApiCacheDataSource {
-        return NumCallApiCacheDataSourceImpl(dataStoreManager)
-    }
 
     @Provides
     @Singleton
@@ -96,12 +86,4 @@ class FrameworkModule {
             appContext.preferencesDataStoreFile(APP_CACHE)
         }
     }
-
-    @Provides
-    @Singleton
-    fun provideMarvelApi(httpClient: HttpClient): MarvelApi = MarvelApiImpl(httpClient)
-
-    @Provides
-    @Singleton
-    fun provideMarvelDataSource(api: MarvelApiImpl): MarvelDataSource = MarvelDataSourceImpl(api)
 }
