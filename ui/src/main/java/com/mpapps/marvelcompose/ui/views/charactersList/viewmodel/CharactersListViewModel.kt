@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.lifecycle.viewModelScope
+import androidx.palette.graphics.Palette
 import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.size.Size
@@ -19,6 +20,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 @HiltViewModel
 internal class CharactersListViewModel @Inject constructor(
@@ -36,7 +39,6 @@ internal class CharactersListViewModel @Inject constructor(
         when (event) {
             is CharactersListEvent.GetCharacters -> getCharacters()
             is CharactersListEvent.NavigationToDetail -> goToDetail(event.charactersUi)
-            is CharactersListEvent.LoadImage -> loadImage(event.id, event.thumbnailUrl)
         }
     }
 
@@ -60,10 +62,17 @@ internal class CharactersListViewModel @Inject constructor(
                 }
                 charactersUseCase()
                     .collectLatest { result ->
-                        result.fold(::handleError) { data ->
+                        result.fold(::handleError) { newData ->
+                            val data = uiState.data.apply {
+                                putAll(newData.associateBy { it.id })
+                            }
+                            data.forEach {
+                                val newCharacter = requestImage(it.value, it.value.thumbnailUrl)
+                                data.replace(newCharacter.id, newCharacter)
+                            }
                             setState {
                                 copy(
-                                    data = uiState.data + data,
+                                    data = data,
                                     isLoading = false
                                 )
                             }
@@ -73,29 +82,41 @@ internal class CharactersListViewModel @Inject constructor(
         }
     }
 
-    private fun loadImage(id: String, thumbnailUrl: String) {
-        val imageRequest = ImageRequest.Builder(appContext)
-            .data(thumbnailUrl)
-            .size(Size.ORIGINAL)
-            .listener { _, result ->
-                runImage(id, result.drawable)
-            }
-            .build()
-        ImageLoader(appContext).enqueue(imageRequest)
+    private suspend fun requestImage(
+        characters: Characters,
+        thumbnailUrl: String,
+    ): Characters {
+        return suspendCoroutine { continuation ->
+            val imageRequest = ImageRequest.Builder(appContext)
+                .data(thumbnailUrl)
+                .size(Size.ORIGINAL)
+                .listener { _, result ->
+                    loadImage(characters, result.drawable) {
+                        continuation.resume((it))
+                    }
+                }
+                .build()
+            ImageLoader(appContext).enqueue(imageRequest)
+        }
     }
 
-    private fun runImage(id: String, drawable: Drawable) {
+    private fun loadImage(
+        characters: Characters,
+        drawable: Drawable,
+        onLoadImage: (Characters) -> Unit
+    ) {
         val bitmap = (drawable as BitmapDrawable).bitmap
         val convertBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-        val data = uiState.data.map {
-            if (it.id == id) it.copy(bitmapThumbnail = convertBitmap) else it
-        }
-        setState {
-            copy(
-                data = data,
-                isLoading = false
-            )
-        }
+        val color = loadColor(convertBitmap)
+        val newCharacter = characters.copy(bitmapThumbnail = convertBitmap, color = color)
+        onLoadImage(newCharacter)
     }
 
+    private fun loadColor(bitmapThumbnail: Bitmap): Int? {
+        return bitmapThumbnail.let {
+            val palette = Palette.from(bitmapThumbnail).generate()
+            val dominantSwatch = palette.dominantSwatch
+            dominantSwatch?.rgb
+        }
+    }
 }

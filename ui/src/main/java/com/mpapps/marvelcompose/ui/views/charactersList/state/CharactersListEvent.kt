@@ -7,5 +7,4 @@ import com.mpapps.marvelcompose.ui.infrastructure.EventState
 sealed class CharactersListEvent : EventState {
     object GetCharacters : CharactersListEvent()
     data class NavigationToDetail(val charactersUi: Characters) : CharactersListEvent()
-    data class LoadImage(val id: String, val thumbnailUrl: String) : CharactersListEvent()
 }

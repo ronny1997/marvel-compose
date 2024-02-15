@@ -16,7 +16,6 @@ abstract class BaseViewModel<Effect : ViewSideEffect, Event : EventState, UiStat
     abstract fun setInitialState(): UiState
     private val initialState: UiState by lazy { setInitialState() }
     var uiState by mutableStateOf(initialState)
-        protected set
 
     private val _event: MutableSharedFlow<Event> = MutableSharedFlow()
     abstract fun onEvent(event: Event)

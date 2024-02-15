@@ -17,7 +17,7 @@ class MarvelRepositoryImpl @Inject constructor(
 ) : MarvelRepository, BaseRepository() {
 
     companion object {
-        const val LIMIT_CHARACTERS = 15
+        const val LIMIT_CHARACTERS = 30
         const val ONE = 1
     }
 

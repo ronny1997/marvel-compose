@@ -13,18 +13,5 @@ data class Characters(
     val description: String,
     val bitmapThumbnail: Bitmap?,
     val thumbnailUrl: String,
-) : Serializable {
-    var color: Int? = null
-
-    init {
-        loadColor()
-    }
-
-    private fun loadColor() {
-        bitmapThumbnail?.let {
-            val palette = Palette.from(bitmapThumbnail).generate()
-            val dominantSwatch = palette.dominantSwatch
-             color = dominantSwatch?.rgb
-        }
-    }
-}
+    val color: Int? = null,
+) : Serializable
