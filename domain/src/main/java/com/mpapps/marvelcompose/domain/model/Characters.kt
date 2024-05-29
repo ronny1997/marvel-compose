@@ -11,7 +11,7 @@ data class Characters(
     val id: String,
     val name: String,
     val description: String,
-    val bitmapThumbnail: Bitmap?,
+    var bitmapThumbnail: Bitmap?,
     val thumbnailUrl: String,
-    val color: Int? = null,
+    var color: Int? = null,
 ) : Serializable

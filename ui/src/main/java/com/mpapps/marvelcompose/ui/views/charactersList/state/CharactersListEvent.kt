@@ -1,6 +1,5 @@
 package com.mpapps.marvelcompose.ui.views.charactersList.state
 
-import android.graphics.drawable.Drawable
 import com.mpapps.marvelcompose.domain.model.Characters
 import com.mpapps.marvelcompose.ui.infrastructure.EventState
 
