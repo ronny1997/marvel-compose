@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import com.mpapps.marvelcompose.domain.model.Characters
 import com.mpapps.marvelcompose.domain.usecase.GetComicFromCharacterUseCase
 import com.mpapps.marvelcompose.ui.infrastructure.BaseViewModel
+import com.mpapps.marvelcompose.ui.infrastructure.error.UiError
 import com.mpapps.marvelcompose.ui.views.character.state.CharacterDetailEffect
 import com.mpapps.marvelcompose.ui.views.character.state.CharacterDetailEvent
 import com.mpapps.marvelcompose.ui.views.character.state.CharacterDetailViewState
@@ -41,7 +42,16 @@ internal class CharacterDetailViewModel @Inject constructor(
     private fun getComics(characterId: String) {
         viewModelScope.launch {
             getComicFromCharacterUseCase(characterId).collectLatest { result ->
-                result.fold(::handleError) { data ->
+                result.fold({
+                    handleError(it) {
+                        setState {
+                            copy(
+                                isLoading = false,
+                                uiError = UiError(it),
+                            )
+                        }
+                    }
+                }) { data ->
                     setState {
                         copy(comicList = data)
                     }

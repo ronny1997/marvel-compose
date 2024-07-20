@@ -16,20 +16,20 @@ abstract class BaseUseCase<out T : Any, in Params> {
 
      suspend operator fun invoke(params: Params? = null): Flow<DomainResult<T, DomainError>> {
          return runInBackground(params ?: Unit as Params)
-             .map { result ->
+             .map<T, DomainResult<T, DomainError>> { result ->
                  DomainResult.Success(result)
              }
              .catch { e ->
-                DomainResult.Error(handleError(e as RuntimeException))
+                 emit(DomainResult.Error(handleError(e as RuntimeException)))
              }
              .flowOn(Dispatchers.IO)
     }
 
     protected open fun handleError(e: RuntimeException): DomainError {
         return when (e) {
-            is RepositoryException.UnauthorizedRepositoryException -> DomainError.NoConnectionError
-            is RepositoryException.NotFoundRepositoryException -> DomainError.NotFoundError
-            else -> DomainError.NotFoundError
+            is RepositoryException.UnauthorizedRepositoryException -> DomainError.NoConnectionError()
+            is RepositoryException.NotFoundRepositoryException -> DomainError.NotFoundError()
+            else -> DomainError.GenericError
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.mpapps.marvelcompose.domain.infrastructure.error
 
-sealed interface DomainError {
-    object NoConnectionError : DomainError
-    object NotFoundError : DomainError
-    class GenericError(var message: String? = null) : DomainError
+sealed class DomainError(val message: String = "Generic error") {
+    class NoConnectionError(message: String = "Not conection") : DomainError(message)
+    class NotFoundError(message: String = "Not found error") : DomainError(message)
+    object GenericError : DomainError()
 }

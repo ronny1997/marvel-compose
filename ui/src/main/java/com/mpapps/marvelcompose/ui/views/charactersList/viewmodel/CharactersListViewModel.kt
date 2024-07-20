@@ -26,13 +26,14 @@ internal class CharactersListViewModel @Inject constructor(
     override fun onEvent(event: CharactersListEvent) {
         when (event) {
             is CharactersListEvent.GetCharacters -> getCharacters()
-            is CharactersListEvent.NavigationToDetail -> goToDetail(event.charactersUi)
+            is CharactersListEvent.NavigationToDetail -> goToDetail(event.id)
         }
     }
 
-    private fun goToDetail(charactersUi: Characters) {
+    private fun goToDetail(id: String) {
+        val character = uiState.data[id] ?: throw Throwable("Character not found")
         setEffect {
-            CharactersListEffect.Navigation.NavigateToDetail(charactersUi)
+            CharactersListEffect.Navigation.NavigateToDetail(character)
         }
     }
 
@@ -43,25 +44,27 @@ internal class CharactersListViewModel @Inject constructor(
     private fun getCharacters() {
         viewModelScope.launch {
             if (!uiState.isLoading) {
-                setState {
-                    copy(
-                        isLoading = true
-                    )
-                }
+                setState { copy(isLoading = true) }
                 charactersUseCase()
                     .collectLatest { result ->
-                        result.fold(::handleError) { newData ->
+                        result.fold({
+                            handleError(it) {
+                                setEffect {
+                                    CharactersListEffect.ShowError(it)
+                                }
+                            }
+                        }) { newData ->
                             val data = uiState.data.apply {
                                 putAll(newData.associateBy { it.id })
                             }
                             setState {
                                 copy(
                                     data = data,
-                                    isLoading = false
                                 )
                             }
                         }
                     }
+                setState { copy(isLoading = false) }
             }
         }
     }

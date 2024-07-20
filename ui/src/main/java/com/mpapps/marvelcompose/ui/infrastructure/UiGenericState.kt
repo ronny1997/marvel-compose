@@ -1,6 +1,8 @@
 package com.mpapps.marvelcompose.ui.infrastructure
 
- abstract class UiState(
+import com.mpapps.marvelcompose.ui.infrastructure.error.UiError
+
+abstract class UiState(
      open var isLoading: Boolean,
-     open var isError: Boolean
+     open var uiError: UiError?
 )

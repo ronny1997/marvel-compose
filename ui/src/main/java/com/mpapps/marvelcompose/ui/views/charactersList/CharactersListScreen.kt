@@ -1,6 +1,7 @@
 package com.mpapps.marvelcompose.ui.views.charactersList
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.mpapps.marvelcompose.domain.model.Characters
 import com.mpapps.marvelcompose.ui.infrastructure.SIDE_EFFECTS_KEY
 import com.mpapps.marvelcompose.ui.views.charactersList.composable.CharacterItem
+import com.mpapps.marvelcompose.ui.views.charactersList.composable.SnackbarError
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEffect
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEvent
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListViewState
@@ -38,54 +40,60 @@ fun CharactersListScreen(
     onEventSend: (CharactersListEvent) -> Unit,
     onNavigationRequested: (CharactersListEffect.Navigation) -> Unit,
 ) {
-    Column {
-        if (state.isLoading) {
-            LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-        val lazyGridState = rememberLazyGridState()
-        LazyVerticalGrid(
-            state = lazyGridState,
-            columns = GridCells.Adaptive(minSize = 100.dp),
-            contentPadding = PaddingValues(10.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            items(
-                items = state.data.values.toList(),
-            ) { character ->
-                var colorCharacter by remember {
-                    mutableStateOf(Color(character.color ?: 0))
-                }
-                CharacterItem(
-                    name = character.name,
-                    thumbnailUrl = character.thumbnailUrl,
-                    colorCharacter = colorCharacter,
-                    chargeImage = character.bitmapThumbnail?.let { false } ?: true,
-                    onClickCharacter = {
-                        onEventSend(CharactersListEvent.NavigationToDetail(character))
-                    },
-                    onLoadImage = { bitmap, color ->
-                        character.color = color
-                        colorCharacter = Color(character.color ?: 0)
-                        character.bitmapThumbnail = bitmap
-                    },
+    var visible by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("Generic error") }
+    Box {
+        SnackbarError(message = errorMessage, visible = visible, onHide = { visible = false })
+        Column {
+            if (state.isLoading) {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
-        }
-        LaunchedEffect(lazyGridState) {
-            val snapshotFlowItems = snapshotFlow {
-                lazyGridState.layoutInfo.totalItemsCount
-            }
-            val snapshotFlowIndex = snapshotFlow {
-                lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            }
-            snapshotFlowItems.combine(snapshotFlowIndex) { totalItems, lastIndex ->
-                if (totalItems > 0 && lastIndex >= totalItems - 1) {
-                    onEventSend(CharactersListEvent.GetCharacters)
+            val lazyGridState = rememberLazyGridState()
+            LazyVerticalGrid(
+                state = lazyGridState,
+                columns = GridCells.Adaptive(minSize = 100.dp),
+                contentPadding = PaddingValues(10.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                items(
+                    items = state.data.values.toList(),
+                ) { character ->
+                    var colorCharacter by remember {
+                        mutableStateOf(Color(character.color ?: 0))
+                    }
+                    CharacterItem(
+                        id = character.id,
+                        name = character.name,
+                        thumbnailUrl = character.thumbnailUrl,
+                        colorCharacter = colorCharacter,
+                        chargeImage = character.bitmapThumbnail?.let { false } ?: true,
+                        onAction = {
+                            onEventSend(it as CharactersListEvent)
+                        },
+                        onLoadImage = { bitmap, color ->
+                            character.color = color
+                            colorCharacter = Color(character.color ?: 0)
+                            character.bitmapThumbnail = bitmap
+                        },
+                    )
                 }
-            }.collect()
+            }
+            LaunchedEffect(lazyGridState) {
+                val snapshotFlowItems = snapshotFlow {
+                    lazyGridState.layoutInfo.totalItemsCount
+                }
+                val snapshotFlowIndex = snapshotFlow {
+                    lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                }
+                snapshotFlowItems.combine(snapshotFlowIndex) { totalItems, lastIndex ->
+                    if (totalItems > 0 && lastIndex >= totalItems - 1) {
+                        onEventSend(CharactersListEvent.GetCharacters)
+                    }
+                }.collect()
+            }
         }
     }
     LaunchedEffect(SIDE_EFFECTS_KEY) {
@@ -93,6 +101,11 @@ fun CharactersListScreen(
             when (effect) {
                 is CharactersListEffect.Navigation.NavigateToDetail -> {
                     onNavigationRequested(effect)
+                }
+
+                is CharactersListEffect.ShowError -> {
+                    errorMessage = effect.message
+                    visible = true
                 }
             }
         }?.collect()

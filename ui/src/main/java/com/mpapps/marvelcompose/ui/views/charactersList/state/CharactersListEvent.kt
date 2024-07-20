@@ -5,5 +5,5 @@ import com.mpapps.marvelcompose.ui.infrastructure.EventState
 
 sealed class CharactersListEvent : EventState {
     object GetCharacters : CharactersListEvent()
-    data class NavigationToDetail(val charactersUi: Characters) : CharactersListEvent()
+    data class NavigationToDetail(val id: String) : CharactersListEvent()
 }

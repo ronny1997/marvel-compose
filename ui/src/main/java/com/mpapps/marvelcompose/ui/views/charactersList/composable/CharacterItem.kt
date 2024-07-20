@@ -29,14 +29,17 @@ import androidx.compose.ui.unit.dp
 import androidx.palette.graphics.Palette
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.mpapps.marvelcompose.ui.infrastructure.OnAction
+import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEvent
 
 @Composable
 fun CharacterItem(
+    id: String,
     name: String,
     thumbnailUrl: String?,
     colorCharacter: Color?,
     chargeImage: Boolean,
-    onClickCharacter: () -> Unit,
+    onAction: OnAction,
     onLoadImage: (Bitmap, Int?) -> Unit,
 ) {
     val dominantColor = remember { Animatable(Color.LightGray) }
@@ -49,7 +52,7 @@ fun CharacterItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                onClickCharacter()
+                onAction(CharactersListEvent.NavigationToDetail(id))
             },
         shape = RoundedCornerShape(8.dp),
         elevation = 5.dp
@@ -101,10 +104,13 @@ fun CharacterItem(
 @Preview
 @Composable
 fun TestComposable() {
-    CharacterItem(name = "Test", thumbnailUrl = null,
+    CharacterItem(
+        id = "id",
+        name = "Test",
+        thumbnailUrl = null,
         colorCharacter = null,
         chargeImage = false,
-        onClickCharacter = {},
+        onAction = {},
         onLoadImage = { _, _ -> })
 }
 

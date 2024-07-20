@@ -49,11 +49,13 @@ abstract class BaseViewModel<Effect : ViewSideEffect, Event : EventState, UiStat
         viewModelScope.launch { _effect.send(effectValue) }
     }
 
-    private fun handleError(t: Throwable?) {
-        /* handleError(DomainError.GenericError(t?.message))*/
-    }
+    protected fun handleError(domainError: DomainError, onError: (String) -> Unit) {
+        when(domainError){
+            is DomainError.GenericError -> onError(domainError.message)
+            is DomainError.NoConnectionError -> onError(domainError.message)
+            is DomainError.NotFoundError -> onError(domainError.message)
 
-    protected fun handleError(domainError: DomainError) {
+        }
 
     }
     /* protected fun handleError(domainError: DomainError): UiGenericState<VS> {
