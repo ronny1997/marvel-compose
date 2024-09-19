@@ -1,14 +1,6 @@
 package com.mpapps.marvelcompose.ui.views.charactersList.viewmodel
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import androidx.lifecycle.viewModelScope
-import androidx.palette.graphics.Palette
-import coil.ImageLoader
-import coil.request.ImageRequest
-import coil.size.Size
 import com.mpapps.marvelcompose.domain.model.Characters
 import com.mpapps.marvelcompose.domain.usecase.GetCharactersUseCase
 import com.mpapps.marvelcompose.ui.infrastructure.BaseViewModel
@@ -16,17 +8,13 @@ import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEffe
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListEvent
 import com.mpapps.marvelcompose.ui.views.charactersList.state.CharactersListViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 @HiltViewModel
 internal class CharactersListViewModel @Inject constructor(
     private val charactersUseCase: GetCharactersUseCase,
-    @ApplicationContext val appContext: Context
 ) : BaseViewModel<CharactersListEffect, CharactersListEvent, CharactersListViewState>() {
 
     init {
@@ -38,13 +26,14 @@ internal class CharactersListViewModel @Inject constructor(
     override fun onEvent(event: CharactersListEvent) {
         when (event) {
             is CharactersListEvent.GetCharacters -> getCharacters()
-            is CharactersListEvent.NavigationToDetail -> goToDetail(event.charactersUi)
+            is CharactersListEvent.NavigationToDetail -> goToDetail(event.id)
         }
     }
 
-    private fun goToDetail(charactersUi: Characters) {
+    private fun goToDetail(id: String) {
+        val character = uiState.data[id] ?: throw Throwable("Character not found")
         setEffect {
-            CharactersListEffect.Navigation.NavigateToDetail(charactersUi)
+            CharactersListEffect.Navigation.NavigateToDetail(character)
         }
     }
 
@@ -55,68 +44,28 @@ internal class CharactersListViewModel @Inject constructor(
     private fun getCharacters() {
         viewModelScope.launch {
             if (!uiState.isLoading) {
-                setState {
-                    copy(
-                        isLoading = true
-                    )
-                }
+                setState { copy(isLoading = true) }
                 charactersUseCase()
                     .collectLatest { result ->
-                        result.fold(::handleError) { newData ->
+                        result.fold({
+                            handleError(it) {
+                                setEffect {
+                                    CharactersListEffect.ShowError(it)
+                                }
+                            }
+                        }) { newData ->
                             val data = uiState.data.apply {
                                 putAll(newData.associateBy { it.id })
-                            }
-                            data.forEach {
-                                val newCharacter = requestImage(it.value, it.value.thumbnailUrl)
-                                data.replace(newCharacter.id, newCharacter)
                             }
                             setState {
                                 copy(
                                     data = data,
-                                    isLoading = false
                                 )
                             }
                         }
                     }
+                setState { copy(isLoading = false) }
             }
-        }
-    }
-
-    private suspend fun requestImage(
-        characters: Characters,
-        thumbnailUrl: String,
-    ): Characters {
-        return suspendCoroutine { continuation ->
-            val imageRequest = ImageRequest.Builder(appContext)
-                .data(thumbnailUrl)
-                .size(Size.ORIGINAL)
-                .listener { _, result ->
-                    loadImage(characters, result.drawable) {
-                        continuation.resume((it))
-                    }
-                }
-                .build()
-            ImageLoader(appContext).enqueue(imageRequest)
-        }
-    }
-
-    private fun loadImage(
-        characters: Characters,
-        drawable: Drawable,
-        onLoadImage: (Characters) -> Unit
-    ) {
-        val bitmap = (drawable as BitmapDrawable).bitmap
-        val convertBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-        val color = loadColor(convertBitmap)
-        val newCharacter = characters.copy(bitmapThumbnail = convertBitmap, color = color)
-        onLoadImage(newCharacter)
-    }
-
-    private fun loadColor(bitmapThumbnail: Bitmap): Int? {
-        return bitmapThumbnail.let {
-            val palette = Palette.from(bitmapThumbnail).generate()
-            val dominantSwatch = palette.dominantSwatch
-            dominantSwatch?.rgb
         }
     }
 }
